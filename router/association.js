@@ -30,6 +30,11 @@ module.exports = function () {
 //   Class.hasMany(Student, { foreignKey: 'class_id', as: 'students_link_with_class' });
 //   Student.belongsTo(Class, { foreignKey: 'class_id', as: 'class_link_with_students' });
 
+     // Class and timetable association
+    //  Class.hasMany(Timetable, { foreignKey: 'classId', as: 'class_link_with_timetable' });
+    //  Timetable.belongsTo(Class, { foreignKey: 'classId', as: 'timetable_link_with_class' });
+
+
 //   // Teacher associations
 //   Teacher.hasMany(TeacherSalary, { foreignKey: 'teacher_id', as: 'salaries_link_with_teacher' });
 //   Teacher.hasMany(TeacherAttendance, { foreignKey: 'teacher_id', as: 'attendance_link_with_teacher' });

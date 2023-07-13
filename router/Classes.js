@@ -7,6 +7,7 @@ router.get("/", async (req, res) => {
   try {
     const classes = await Class.findAll({
       where: { isActive: true }, // Filter out deleted records
+      attributes: { exclude: ["createdAt", "updatedAt"] },
     });
     res.send(classes);
   } catch (error) {
@@ -16,11 +17,11 @@ router.get("/", async (req, res) => {
 });
 
 // GET /api/classes/class9
-router.get("/class9", async (req, res) => {
+router.get("/class8", async (req, res) => {
   try {
     const class9Records = await Class.findAll({
       where: {
-        grade: "Class 9",
+        grade: "Class 8",
       },
     });
     res.send(class9Records);
@@ -113,18 +114,19 @@ router.delete("/:id", async (req, res) => {
     const classId = req.params.id;
 
     const classObj = await Class.findOne({
-      where: { id: classId, isDeleted: false }, // Filter out deleted record
+      where: { id: classId }, // Find the record by ID
     });
+
     if (!classObj) {
       return res.status(404).send("Class not found");
     }
 
-    // Soft delete by setting isDeleted to true
-    await classObj.update({ isDeleted: true });
+    // Update the isActive field to false
+    await classObj.update({ isActive: false });
 
-    res.send("Class deleted successfully");
+    res.send("Class deactivated successfully");
   } catch (error) {
-    console.error("Error deleting class:", error);
+    console.error("Error deactivating class:", error);
     res.status(500).send("Internal server error");
   }
 });

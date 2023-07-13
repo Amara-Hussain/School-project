@@ -14,6 +14,7 @@ const { NonTeachingStaffSalary } = require("../models/NonTeachingStaffSalary");
 const {
   NonTeachingStaffAttendanceItem,
 } = require("../models/StaffAttendanceItem");
+const {Timetable} = require("../models/Timetable")
 const express = require("express");
 const router = express.Router();
 
@@ -22,6 +23,7 @@ router.get("/", async (req, res) => {
   try {
     await Admin.sync({ alert: true });
     await Class.sync({ alert: true });
+    await Timetable.sync({alert:true});
     await Student.sync({ alert: true });
     await StudentFees.sync({ alert: true });
     await StudentAttendance.sync({ alert: true });

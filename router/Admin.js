@@ -7,7 +7,7 @@ router.get('/', async (req, res) => {
   try {
     const admins = await Admin.findAll({
       where: { isAdmin: true }, 
-      attributes: { exclude: ['password'] }, // Exclude the password field from the response
+      attributes: { exclude: ['password'] }, 
     });
     res.send(admins);
   } catch (error) {

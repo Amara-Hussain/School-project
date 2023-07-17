@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Admin } = require('../models/Admin');
 
-// GET /admin - Retrieve all admin records
+//GET /admin - Retrieve all admin records
 router.get('/', async (req, res) => {
   try {
     const admins = await Admin.findAll({

@@ -7,13 +7,9 @@ const { Teacher } = require("../models/Teacher");
 const { TeacherAttendance } = require("../models/TeacherAttendance");
 const { TeacherSalary } = require("../models/TeacherSalary");
 const { NonTeachingStaff } = require("../models/NonTeachingStaff");
-const {
-  NonTeachingStaffAttendance,
-} = require("../models/NonTeachingStaffAttendance");
+const { NonTeachingStaffAttendance } = require("../models/NonTeachingStaffAttendance");
 const { NonTeachingStaffSalary } = require("../models/NonTeachingStaffSalary");
-const {
-  NonTeachingStaffAttendanceItem,
-} = require("../models/StaffAttendanceItem");
+const { StaffAttendance } = require("../models/StaffAttendance");
 const {Timetable} = require("../models/Timetable")
 const express = require("express");
 const router = express.Router();
@@ -33,7 +29,7 @@ router.get("/", async (req, res) => {
     await NonTeachingStaff.sync({ alert: true });
     await NonTeachingStaffSalary.sync({ alert: true });
     await NonTeachingStaffAttendance.sync({ alert: true });
-    await NonTeachingStaffAttendanceItem.sync({ alert: true });
+    await StaffAttendance.sync({ alert: true });
 
     res.send("Succesfully create table in database");
   } catch (error) {

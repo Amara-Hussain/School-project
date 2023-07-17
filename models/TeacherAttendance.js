@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const { v4: uuidv4 } = require("uuid");
 const Joi = require('joi')
-require('../models/Teacher')
+const { Teacher } = require("../models/Teacher");
 
 const TeacherAttendance = sequelize.define("TeacherAttendance", {
   id: {
@@ -28,14 +28,14 @@ const TeacherAttendance = sequelize.define("TeacherAttendance", {
     defaultValue: false,
     allowNull: false,
   },
-  // teacherId: {
-  //   type: DataTypes.INTEGER,
-  //   allowNull: false,
-  //   references: {
-  //     model: "Teacher",
-  //     key: "id",
-  //   },
-  // },
+  teacherId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: Teacher,
+      key: "id",
+    },
+  },
 });
 
 function validateTeacherAttendance(teacher) {
@@ -44,7 +44,7 @@ function validateTeacherAttendance(teacher) {
     attendance_date: Joi.date().default(Date.now),
     teacher_name: Joi.string().required(),
     present: Joi.boolean().required(),
-    // teacherId: Joi.number().integer().required(),
+    teacherId: Joi.string().uuid().required()
   });
   return schema.validate(teacher);
 }

@@ -1,12 +1,46 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { TeacherSalary } = require('../models/TeacherSalary');
+const { TeacherSalary } = require("../models/TeacherSalary");
+const { Teacher } = require("../models/Teacher");
 
-// GET /teacherSalary - Retrieve all teacher salary records
-router.get('/teacherSalary', async (req, res) => {
+// Get teacher's salary if available
+// router.get("/teachers", async (req, res) => {
+//   try {
+//     const teacher = await Teacher.findAll({
+//       // where: { id: req.params.id },
+//       attributes: { exclude: ["createdAt", "updatedAt"] },
+//     });
+//     if (!teacher) {
+//       return res.status(404).send("Teacher not found");
+//     }
+
+//     const salary = await TeacherSalary.findAll({
+//       // where: { teacherId: req.params.id },
+//       attributes: { exclude: ["createdAt", "updatedAt"] },
+
+//     });
+//     if (!salary) {
+//       return res.send("Teacher does not have a salary record");
+//     }
+
+//     res.send(salary);
+//   } catch (error) {
+//     console.error("Error retrieving teacher salary:", error);
+//     res.status(500).send("Internal server error");
+//   }
+// });
+
+router.get('/', async (req, res) => {
   try {
     const teacherSalaries = await TeacherSalary.findAll({
-      where: { visible: true }, // Filter out records that should not be shown
+      include: {
+        model: Teacher,
+        as: 'teacher_link_with_salary',
+        attributes: ['id','teacher_name'], // Include only the teacher_name attribute from the Teacher model
+      },
+      attributes: {
+        exclude: ['createdAt', 'updatedAt','teacher_name','teacherId'], // Exclude the specified fields from the TeacherSalary model
+      },
     });
     res.send(teacherSalaries);
   } catch (error) {
@@ -15,45 +49,83 @@ router.get('/teacherSalary', async (req, res) => {
   }
 });
 
-// POST /teacherSalary - Create a new teacher salary record
-router.post('/teacherSalary', async (req, res) => {
-  try {
-    const teacherSalary = await TeacherSalary.create(req.body);
-    res.status(201).send(teacherSalary);
-  } catch (error) {
-    console.error('Error creating teacher salary:', error);
-    res.status(500).send('Internal server error');
-  }
-});
 
-// PUT /teacherSalary/:id - Update a teacher salary record by ID
-router.put('/teacherSalary/:id', async (req, res) => {
-  const { id } = req.params;
+// Create teacher's salary
+router.post("/teachers/:id/salary", async (req, res) => {
   try {
-    const [updatedRows] = await TeacherSalary.update(req.body, {
-      where: { id },
-    });
-
-    if (updatedRows === 0) {
-      return res.status(404).send('Teacher salary not found');
+    const teacher = await Teacher.findOne({ where: { id: req.params.id } });
+    if (!teacher) {
+      return res.status(404).send("Teacher not found");
     }
 
-    res.send('Teacher salary updated successfully');
+    const salary = await TeacherSalary.create({
+      admin: req.body.admin,
+      teacher_name: teacher.teacher_name,
+      teacherId: teacher.id,
+      salaryForTheYear: req.body.salaryForTheYear,
+      salaryForTheMonth: req.body.salaryForTheMonth,
+      salaryAmount: req.body.salaryAmount,
+    });
+
+    res.status(201).send(salary);
   } catch (error) {
-    console.error('Error updating teacher salary:', error);
-    res.status(500).send('Internal server error');
+    console.error("Error creating teacher salary:", error);
+    res.status(500).send("Internal server error");
   }
 });
 
-// DELETE /teacherSalary/:id - Update the visibility of a teacher salary record by ID
-router.delete('/teacherSalary/:id', async (req, res) => {
-  const { id } = req.params;
+// Update teacher's salary
+router.put("/teachers/:id/salary", async (req, res) => {
   try {
-    await TeacherSalary.update({ visible: false }, { where: { id } });
-    res.send('Teacher salary record hidden successfully');
+    const teacher = await Teacher.findOne({ where: { id: req.params.id } });
+    if (!teacher) {
+      return res.status(404).send("Teacher not found");
+    }
+
+    const salary = await TeacherSalary.findOne({
+      where: { teacherId: req.params.id },
+    });
+    if (!salary) {
+      return res.send("Teacher does not have a salary record");
+    }
+
+    await salary.update({
+      admin: req.body.admin || salary.admin,
+      teacher_name: teacher.teacher_name,
+      teacherId: teacher.id,
+      salaryForTheYear: req.body.salaryForTheYear || salary.salaryForTheYear,
+      salaryForTheMonth: req.body.salaryForTheMonth || salary.salaryForTheMonth,
+      salaryAmount: req.body.salaryAmount || salary.salaryAmount,
+    });
+
+    res.send(salary);
   } catch (error) {
-    console.error('Error hiding teacher salary record:', error);
-    res.status(500).send('Internal server error');
+    console.error("Error updating teacher salary:", error);
+    res.status(500).send("Internal server error");
+  }
+});
+
+// Delete teacher's salary
+router.delete("/teachers/:id/salary", async (req, res) => {
+  try {
+    const teacher = await Teacher.findOne({ where: { id: req.params.id } });
+    if (!teacher) {
+      return res.status(404).send("Teacher not found");
+    }
+
+    const salary = await TeacherSalary.findOne({
+      where: { teacherId: req.params.id },
+    });
+    if (!salary) {
+      return res.send("Teacher does not have a salary record");
+    }
+
+    await salary.destroy();
+
+    res.send("Teacher salary deleted");
+  } catch (error) {
+    console.error("Error deleting teacher salary:", error);
+    res.status(500).send("Internal server error");
   }
 });
 

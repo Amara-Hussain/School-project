@@ -1,24 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { Student } = require('../models/Student');
-
-// Create a new student
-router.post('/students', async (req, res) => {
-  try {
-    const student = await Student.create(req.body);
-    res.status(201).send(student);
-  } catch (error) {
-    console.error('Error creating student:', error);
-    res.status(500).send('Internal server error');
-  }
-});
+const { Student ,validate} = require('../models/Student');
 
 // Get all students (without deleted records)
-router.get('/students', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const students = await Student.findAll({
-      where: { isDeleted: false }, // Filter out deleted records
-    });
+    const students = await Student.findAll({attributes: { exclude: ["createdAt", "updatedAt"] },});
     res.send(students);
   } catch (error) {
     console.error('Error retrieving students:', error);
@@ -30,7 +17,7 @@ router.get('/students', async (req, res) => {
 router.get('/students/:id', async (req, res) => {
   try {
     const student = await Student.findOne({
-      where: { id: req.params.id, isDeleted: false }, // Filter out deleted records
+      where: { id: req.params.id },
     });
     if (!student) {
       return res.status(404).send('Student not found');
@@ -42,11 +29,29 @@ router.get('/students/:id', async (req, res) => {
   }
 });
 
+
+// Create a new student
+router.post('/', async (req, res) => {
+  const { error } = validate(req.body);
+  if (error) {
+    return res.status(400).send(error.details[0].message);
+  }
+
+  try {
+    const student = await Student.create(req.body);
+    res.status(201).send(student);
+  } catch (error) {
+    console.error('Error creating student:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+
 // Update a student by ID
-router.put('/students/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const student = await Student.findOne({
-      where: { id: req.params.id, isDeleted: false }, // Filter out deleted records
+      where: { id: req.params.id }, // Filter out deleted records
     });
     if (!student) {
       return res.status(404).send('Student not found');
@@ -63,13 +68,13 @@ router.put('/students/:id', async (req, res) => {
 router.delete('/students/:id', async (req, res) => {
   try {
     const student = await Student.findOne({
-      where: { id: req.params.id, isDeleted: false }, // Filter out deleted records
+      where: { id: req.params.id }, // Filter out deleted records
     });
     if (!student) {
       return res.status(404).send('Student not found');
     }
     // Instead of deleting the record, update the "isDeleted" flag
-    await student.update({ isDeleted: true });
+    await student.update();
     res.send('Student marked as deleted');
   } catch (error) {
     console.error('Error deleting student:', error);

@@ -21,9 +21,13 @@ const TeacherSalary = sequelize.define("TeacherSalary", {
     require: true,
   },
   teacherId: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: false,
     require: true,
+    references: {
+      model: 'Teacher', // Assuming you have a Teacher model defined
+      key: 'id',
+    },
   },
   salaryForTheYear: {
     type: DataTypes.STRING,
@@ -48,7 +52,7 @@ function validateTeacherSalary(teacher) {
     attendance_date: Joi.date().default(Date.now),
     teacher_name: Joi.string().required(),
     present: Joi.boolean().required(),
-    teacherId: Joi.number().integer().required(),
+    teacherId: Joi.string().uuid().required()
   });
   return schema.validate(teacher);
 }

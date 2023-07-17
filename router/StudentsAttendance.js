@@ -1,67 +1,107 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { StudentAttendance } = require('../models/StudentAttendance');
+const { Student } = require("../models/Student");
+const { StudentAttendance, validate } = require("../models/StudentAttendance");
 
-// Create a new student attendance record
-router.post('/student-attendance', async (req, res) => {
+// Get all student attendance records
+router.get("/", async (req, res) => {
   try {
-    const { class_teacher, classname, students } = req.body;
-
-    // Create the main student attendance record
-    const studentAttendance = await StudentAttendance.create({
-      class_teacher,
-      classname,
+    const studentAttendances = await StudentAttendance.findAll({
+      include: {
+        model: Student,
+        as: "student_link_with_studentAttendance",
+        attributes: ["id", "student_name", "roll_no"], // Include only the desired attributes from the Student model
+      },
+      attributes: {
+        exclude: ["createdAt", "updatedAt", "student_name"], // Exclude the specified fields from the StudentAttendance model
+      },
     });
+    res.send(studentAttendances);
+  } catch (error) {
+    console.error("Error retrieving student attendance records:", error);
+    res.status(500).send("Internal server error");
+  }
+});
 
-    // Create the student attendance details (students)
-    const studentAttendanceStudents = await StudentAttendanceStudent.bulkCreate(students.map(student => ({
-      student_name: student.student_name,
-      classname: student.classname,
-      roll_no: student.roll_no,
-      present: student.present,
-      StudentAttendanceId: studentAttendance.id, // Associate with the main student attendance record
-    })));
+// router.post("/", async (req, res) => {
+//   try {
+//     const { date } = req.query; // Get the date from the query parameter
 
-    // Associate the student attendance details with the main student attendance record
-    await studentAttendance.addStudentAttendanceStudents(studentAttendanceStudents);
+//     // Validate the date format if needed
+
+//     const attendanceRecords = await StudentAttendance.findAll({
+//       where: {
+//         attendance_date: date, // Filter by the specified date
+//       },
+//     });
+
+//     res.send(attendanceRecords);
+//   } catch (error) {
+//     console.error("Error retrieving attendance records:", error);
+//     res.status(500).send("Internal server error");
+//   }
+// });
+
+router.post("/", async (req, res) => {
+  try {
+    const { error } = validate(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+
+    const student = await Student.findOne({
+      where: { id: req.body.student_id },
+    });
+    if (!student) return res.status(404).send("Student not found");
+
+    const studentAttendance = await StudentAttendance.create({
+      attendance_date: req.body.attendance_date,
+      student_name: req.body.student_name,
+      classname: req.body.classname,
+      roll_no: req.body.roll_no,
+      present: req.body.present,
+      student_id: req.body.student_id,
+    });
 
     res.status(201).send(studentAttendance);
   } catch (error) {
-    console.error('Error creating student attendance:', error);
-    res.status(500).send('Internal server error');
+    console.error("Error creating student attendance record:", error);
+    res.status(500).send("Internal server error");
   }
 });
 
-// Get all student attendance records
-router.get('/student-attendance', async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
-    const studentAttendances = await StudentAttendance.findAll({
-      include: [{ model: StudentAttendanceStudent }],
-    });
+    const { error } = validate(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
 
-    res.send(studentAttendances);
-  } catch (error) {
-    console.error('Error retrieving student attendance:', error);
-    res.status(500).send('Internal server error');
-  }
-});
-
-// Get a specific student attendance record by ID
-router.get('/student-attendance/:id', async (req, res) => {
-  try {
-    const studentAttendance = await StudentAttendance.findOne({
+    const studentAttendance = await StudentAttendance.update(req.body, {
       where: { id: req.params.id },
-      include: [{ model: StudentAttendanceStudent }],
     });
 
-    if (!studentAttendance) {
-      return res.status(404).send('Student attendance not found');
+    if (studentAttendance[0] === 0) {
+      return res.status(404).send("Student attendance not found");
     }
 
-    res.send(studentAttendance);
+    res.send("Student attendance updated successfully");
   } catch (error) {
-    console.error('Error retrieving student attendance:', error);
-    res.status(500).send('Internal server error');
+    console.error("Error updating student attendance:", error);
+    res.status(500).send("Internal server error");
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const studentAttendance = await StudentAttendance.destroy({
+      where: { id: req.params.id },
+    });
+
+    if (studentAttendance === 0) {
+      return res.status(404).send("Student attendance not found");
+    }
+
+    res.send("Student attendance deleted successfully");
+  } catch (error) {
+    console.error("Error deleting student attendance:", error);
+    res.status(500).send("Internal server error");
   }
 });
 

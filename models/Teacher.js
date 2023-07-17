@@ -14,9 +14,6 @@ const Teacher = sequelize.define("Teacher", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  teacherId: {
-    type: DataTypes.INTEGER,
-  },
   qualification: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -48,6 +45,10 @@ const Teacher = sequelize.define("Teacher", {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  designation:{
+    type:DataTypes.STRING,
+    allowNull:false,
+  },
   subjectToTeach: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -57,7 +58,6 @@ const Teacher = sequelize.define("Teacher", {
 function validateTeacher(teacher) {
   const schema = Joi.object({
     teacher_name: Joi.string().required(),
-    teacherId: Joi.number().integer().allow(null),
     qualification: Joi.string().required(),
     address: Joi.string().required(),
     contact_no: Joi.string().required(),
@@ -66,6 +66,7 @@ function validateTeacher(teacher) {
     age: Joi.number().integer().required(),
     email: Joi.string().email().required(),
     estimated_salary: Joi.number().integer().required(),
+    designation:Joi.string().required(),
     subjectToTeach: Joi.string().required(),
   });
   return schema.validate(teacher);

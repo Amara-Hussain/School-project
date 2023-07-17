@@ -3,9 +3,9 @@ const router = express.Router();
 const { Teacher } = require('../models/Teacher');
 
 // GET /teachers - Retrieve all teacher records
-router.get('/teachers', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const teachers = await Teacher.findAll();
+    const teachers = await Teacher.findAll({attributes: { exclude: ["createdAt", "updatedAt"] },});
     res.send(teachers);
   } catch (error) {
     console.error('Error retrieving teachers:', error);
@@ -14,7 +14,7 @@ router.get('/teachers', async (req, res) => {
 });
 
 // POST /teachers - Create a new teacher record
-router.post('/teachers', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const teacher = await Teacher.create(req.body);
     res.status(201).send(teacher);
@@ -25,7 +25,7 @@ router.post('/teachers', async (req, res) => {
 });
 
 // PUT /teachers/:id - Update a teacher record by ID
-router.put('/teachers/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const [updatedRows] = await Teacher.update(req.body, {

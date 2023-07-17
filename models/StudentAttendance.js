@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
-const sequelize  = require("../config/database");
+const sequelize = require("../config/database");
+const { Student } = require("../models/Student");
 const { v4: uuidv4 } = require("uuid");
 const Joi = require("joi");
 
@@ -9,10 +10,6 @@ const StudentAttendance = sequelize.define("StudentAttendance", {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
     unique: true,
-  },
-  class_teacher: {
-    type: DataTypes.STRING,
-    allowNull: false,
   },
   attendance_date: {
     type: DataTypes.DATE,
@@ -35,16 +32,24 @@ const StudentAttendance = sequelize.define("StudentAttendance", {
     defaultValue: false,
     allowNull: false,
   },
+  student_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: Student,
+      key: "id",
+    },
+  },
 });
 
 function validateAttendance(student) {
   const schema = Joi.object({
-    class_teacher: Joi.string().required(),
     attendance_date: Joi.date().default(Date.now),
     student_name: Joi.string().required(),
     classname: Joi.string().required(),
     roll_no: Joi.number().integer().required(),
     present: Joi.boolean().required(),
+    student_id: Joi.string().uuid().required(),
   });
   return schema.validate(student);
 }

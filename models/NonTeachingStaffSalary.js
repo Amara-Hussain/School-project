@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize  = require("../config/database");
+const { NonTeachingStaff} = require('../models/NonTeachingStaff')
 const { v4: uuidv4 } = require("uuid");
 const Joi = require("joi");
 
@@ -20,11 +21,6 @@ const NonTeachingStaffSalary = sequelize.define("NonTeachingStaffSalary", {
     allowNull: false,
     require: true,
   },
-  staffId: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    require: true,
-  },
   salaryForTheYear: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -40,16 +36,25 @@ const NonTeachingStaffSalary = sequelize.define("NonTeachingStaffSalary", {
     allowNull: false,
     require: true,
   },
+  staffId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    require: true,
+    references: {
+      model: NonTeachingStaff,
+      key: 'id',
+    },
+  },
 });
 
 function validateNonTeachingStaffSalary(salary) {
   const schema = Joi.object({
     admin: Joi.string().required(),
     staff_name: Joi.string().required(),
-    staffId: Joi.string().required(),
     salaryForTheYear: Joi.string().required(),
     salaryForTheMonth: Joi.string().required(),
     salaryAmount: Joi.number().required(),
+    staffId: Joi.string().required(),
   });
   return schema.validate(salary);
 }

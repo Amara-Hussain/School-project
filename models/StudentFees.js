@@ -2,6 +2,8 @@ const { DataTypes } = require("sequelize");
 const sequelize  = require("../config/database");
 const { v4: uuidv4 } = require("uuid");
 const Joi = require("joi");
+const { Student} = require('../models/Student')
+
 
 const StudentFees = sequelize.define("StudentFees", {
   id: {
@@ -10,7 +12,7 @@ const StudentFees = sequelize.define("StudentFees", {
     primaryKey: true,
     unique: true,
   },
-  accountant: {
+  admin: {
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -50,11 +52,19 @@ const StudentFees = sequelize.define("StudentFees", {
   exam_fees: {
     type: DataTypes.INTEGER,
   },
+  student_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: Student,
+      key: "id",
+    },
+  },
 });
 
 function validateStudentFees(student) {
   const schema = Joi.object({
-    accountant: Joi.string().required(),
+    admin: Joi.string().required(),
     student_name: Joi.string().required(),
     classname: Joi.string().required(),
     roll_no: Joi.string().required(),
@@ -65,6 +75,7 @@ function validateStudentFees(student) {
     laboratory_fees: Joi.number().integer().allow(null),
     computer_fees: Joi.number().integer().allow(null),
     exam_fees: Joi.number().integer().allow(null),
+    student_id: Joi.string().uuid().required(),
   });
   return schema.validate(student);
 }

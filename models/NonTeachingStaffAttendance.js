@@ -20,8 +20,7 @@ const NonTeachingStaffAttendance = sequelize.define(
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
-  }
-);
+  });
 
 function validateTeacherAttendance(classobj) {
   const schema = Joi.object({

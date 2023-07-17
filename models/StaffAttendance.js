@@ -3,8 +3,8 @@ const sequelize  = require("../config/database");
 const { v4: uuidv4 } = require("uuid");
 const Joi = require("joi");
 
-const NonTeachingStaffAttendanceItem = sequelize.define(
-  "NonTeachingStaffAttendanceItem",
+const StaffAttendance = sequelize.define(
+  "StaffAttendance",
   {
     id: {
       type: DataTypes.UUID,
@@ -28,7 +28,7 @@ const NonTeachingStaffAttendanceItem = sequelize.define(
   }
 );
 
-function validateStaffAttendanceItem(classobj) {
+function validateStaffAttendance(classobj) {
   const schema = Joi.object({
     staffId: Joi.number().integer().required(),
     staff_name: Joi.string().required(),
@@ -37,9 +37,9 @@ function validateStaffAttendanceItem(classobj) {
   return schema.validate(classobj);
 }
 
-NonTeachingStaffAttendanceItem.beforeCreate((attendance) => {
+StaffAttendance.beforeCreate((attendance) => {
   attendance.id = uuidv4();
 });
 
-module.exports.NonTeachingStaffAttendanceItem = NonTeachingStaffAttendanceItem;
-module.exports.validate = validateStaffAttendanceItem;
+module.exports.StaffAttendance = StaffAttendance;
+module.exports.validate = validateStaffAttendance;
